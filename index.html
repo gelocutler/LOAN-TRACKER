@@ -549,7 +549,7 @@
             utang.balance.toFixed(2)
         ]);
 
-        doc.autoTable(columns, rows, { startY: 10 });
+        doc.autoTable({ head: [columns], body: rows, startY: 10 });
 
         // Payment History
         var paymentColumns = ["Name", "Amount Paid", "Date Paid"];
@@ -559,7 +559,7 @@
             payment.datePaid
         ]);
 
-        doc.autoTable(paymentColumns, paymentRows, { startY: doc.autoTable.previous.finalY + 10 });
+        doc.autoTable({ head: [paymentColumns], body: paymentRows, startY: doc.lastAutoTable.finalY + 10 });
 
         doc.save("utang_report.pdf");
     }
@@ -571,4 +571,4 @@
     };
 </script>
 </body>
-</html>    
+</html>
