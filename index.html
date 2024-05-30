@@ -260,7 +260,7 @@
     </div>
 </div>
 
-<script>
+<script async>
     var utangList = JSON.parse(localStorage.getItem("utangList")) || [];
     var paymentHistory = JSON.parse(localStorage.getItem("paymentHistory")) || [];
 
@@ -581,6 +581,7 @@
                 document.body.removeChild(link);
             }
         }
+        return false; // Ito ay para maiwasan ang pag-blink ng screen
     }
 
     // Window onload function
