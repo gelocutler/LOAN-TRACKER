@@ -538,7 +538,6 @@
         var { jsPDF } = window.jspdf;
         var doc = new jsPDF();
 
-        // Utang List
         var columns = ["Name", "Loan Date", "Initial Loan", "Interest", "Total Loan", "Balance"];
         var rows = utangList.map(utang => [
             utang.name,
@@ -549,18 +548,7 @@
             utang.balance.toFixed(2)
         ]);
 
-        doc.autoTable({ head: [columns], body: rows, startY: 10 });
-
-        // Payment History
-        var paymentColumns = ["Name", "Amount Paid", "Date Paid"];
-        var paymentRows = paymentHistory.map(payment => [
-            payment.name,
-            payment.amountPaid.toFixed(2),
-            payment.datePaid
-        ]);
-
-        doc.autoTable({ head: [paymentColumns], body: paymentRows, startY: doc.lastAutoTable.finalY + 10 });
-
+        doc.autoTable(columns, rows);
         doc.save("utang_report.pdf");
     }
 
