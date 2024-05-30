@@ -266,6 +266,26 @@
     var utangList = JSON.parse(localStorage.getItem("utangList")) || [];
     var paymentHistory = JSON.parse(localStorage.getItem("paymentHistory")) || [];
 
+    // Functions ng iyong application
+
+    function downloadPDF() {
+        var doc = new jsPDF(); // Dapat dagdagan ng import statement sa itaas nito.
+        doc.text("Utang List", 10, 10);
+        var headers = ["Name", "Loan Date", "Initial Loan", "Interest", "Total Loan", "Balance"];
+        var data = utangList.map(function(row) {
+            return [row.name, row.loanDate, formatCurrency(row.initialLoan), formatCurrency(row.interest), formatCurrency(row.totalLoan), formatCurrency(row.balance)];
+        });
+        doc.autoTable({
+            head: [headers],
+            body: data,
+        });
+        try {
+            doc.save("utangList.pdf");
+        } catch (error) {
+            console.error("Error sa pag-save ng PDF:", error);
+        }
+    }
+
     function saveData() {
         localStorage.setItem("utangList", JSON.stringify(utangList));
         localStorage.setItem("paymentHistory", JSON.stringify(paymentHistory));
@@ -547,33 +567,7 @@
         document.body.appendChild(downloadLink);
         downloadLink.click();
     }
-        function downloadPDF() {
-      // Create a new jsPDF instance
-      var doc = new jsPDF();
-
-      // Add content to the PDF
-      doc.text(20, 20, 'Utang Details:');
-      doc.text(20, 30, '---------------------------');
-
-      // Sample utang details (replace with your actual data)
-      var utangDetails = [
-        { name: 'Juan Dela Cruz', amount: 5000, balance: 2500 },
-        { name: 'Maria Santos', amount: 3000, balance: 1000 },
-        // Add more utang details here as needed
-      ];
-
-      var startY = 40;
-      utangDetails.forEach((detail, index) => {
-        var text = `Name: ${detail.name}, Amount: ${detail.amount}, Balance: ${detail.balance}`;
-        doc.text(20, startY + (index * 10), text);
-      });
-
-      // Save the PDF as a file
-      doc.save('utang_details.pdf');
-    }
-
-    
-
+       
     // Tungkol sa iba pang functions sa iyong code
 
     // Window onload function
