@@ -4,8 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Utang Tracker</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.17/jspdf.plugin.autotable.min.js"></script>
 <style>
     body {
         font-family: Arial, sans-serif;
@@ -174,7 +172,6 @@
             <label for="loanDate">Loan Date:</label>
             <input type="date" id="loanDate" name="loanDate">
             <button type="button" onclick="addUtang()">Enter</button>
-            <button type="button" onclick="downloadPDF()">Download PDF</button>
         </form>
     </div>
 
@@ -534,29 +531,16 @@
             }
         });
     }
-    function downloadPDF() {
-        var { jsPDF } = window.jspdf;
-        var doc = new jsPDF();
 
-        var columns = ["Name", "Loan Date", "Initial Loan", "Interest", "Total Loan", "Balance"];
-        var rows = utangList.map(utang => [
-            utang.name,
-            utang.loanDate,
-            utang.initialLoan.toFixed(2),
-            utang.interest.toFixed(2),
-            utang.totalLoan.toFixed(2),
-            utang.balance.toFixed(2)
-        ]);
+    // Tungkol sa iba pang functions sa iyong code
 
-        doc.autoTable(columns, rows);
-        doc.save("utang_report.pdf");
-    }
-
+    // Window onload function
     window.onload = function() {
         renderUtangList();
-        renderSummary();
         renderPaymentHistory();
-    };
+        updateSummary();
+    }
 </script>
+
 </body>
 </html>
