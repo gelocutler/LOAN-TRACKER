@@ -586,7 +586,14 @@ function downloadPDF() {
     // Save PDF
     doc.save("utang_report.pdf");
 }
+    // Tungkol sa iba pang functions sa iyong code
 
+    // Window onload function
+    window.onload = function() {
+        renderUtangList();
+        renderPaymentHistory();
+        updateSummary();
+    }
 </script>
 
 </body>
