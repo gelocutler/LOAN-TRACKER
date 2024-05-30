@@ -553,21 +553,15 @@ function downloadPDF() {
         utangByPerson[utang.name].push(utang);
     });
 
-    // Group payments by name and month, sort by date
+    // Group payments by name and month
     var paymentsByPersonAndMonth = {};
     paymentHistory.forEach(payment => {
-        let month = new Date(payment.date).getMonth() + 1;
-        let year = new Date(payment.date).getFullYear();
-        let key = `${payment.name}-${year}-${month}`;
+        var month = new Date(payment.date).getMonth() + 1; // Extract month from date
+        var key = `${payment.name}-${month}`;
         if (!paymentsByPersonAndMonth[key]) {
             paymentsByPersonAndMonth[key] = [];
         }
         paymentsByPersonAndMonth[key].push(payment);
-    });
-
-    // Sort payments within each month
-    Object.keys(paymentsByPersonAndMonth).forEach(key => {
-        paymentsByPersonAndMonth[key].sort((a, b) => new Date(a.date) - new Date(b.date));
     });
 
     // Generate PDF for each person
@@ -599,36 +593,36 @@ function downloadPDF() {
             styles: { fontSize: contentFont.size }
         });
 
-        // Payments by month
-        var paymentsForPerson = Object.keys(paymentsByPersonAndMonth).filter(key => key.startsWith(name));
-        var finalY = doc.previousAutoTable ? doc.previousAutoTable.finalY + 10 : 30;
-        paymentsForPerson.forEach((key, index) => {
-            let monthYear = key.split('-').slice(1).join('-');
-            let paymentRows = paymentsByPersonAndMonth[key].map(payment => [
-                payment.date,
-                payment.amount.toFixed(2)
-            ]);
-            if (index > 0 && index % 12 === 0) {
-                doc.addPage();
-                finalY = 10;
+        // Payments grouped by month
+        var startY = doc.previousAutoTable.finalY + 20;
+        for (let month = 1; month <= 12; month++) {
+            var key = `${name}-${month}`;
+            if (paymentsByPersonAndMonth[key]) {
+                var paymentRows = paymentsByPersonAndMonth[key].map(payment => [
+                    name,
+                    payment.amount.toFixed(2),
+                    payment.date
+                ]);
+
+                // Add header for each month
+                doc.setFontSize(subtitleFont.size);
+                doc.setFont(undefined, subtitleFont.fontStyle);
+                doc.text(`Payments for Month ${month}`, 10, startY);
+
+                doc.autoTable({
+                    startY: startY + 5,
+                    head: [["Name", "Amount Paid", "Date Paid"]],
+                    body: paymentRows,
+                    theme: 'grid',
+                    headStyles: { fillColor: [100, 149, 237], textColor: [255, 255, 255] },  // Different color for payment header
+                    styles: { fontSize: contentFont.size },
+                    margin: { top: 10 }
+                });
+
+                // Update startY for next month's table
+                startY = doc.previousAutoTable.finalY + 10;
             }
-            doc.setFontSize(subtitleFont.size);
-            doc.setFont(undefined, subtitleFont.fontStyle);
-            doc.text(`${monthYear}`, 10, finalY);
-            finalY += 5;
-
-            doc.autoTable({
-                startY: finalY,
-                head: [["Date Paid", "Amount Paid"]],
-                body: paymentRows,
-                theme: 'grid',
-                headStyles: { fillColor: [100, 149, 237], textColor: [255, 255, 255] },
-                styles: { fontSize: contentFont.size },
-                margin: { top: 10 }
-            });
-
-            finalY = doc.previousAutoTable.finalY + 10;
-        });
+        }
     });
 
     // Save PDF
