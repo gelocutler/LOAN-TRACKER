@@ -534,10 +534,11 @@
             }
         });
     }
-    function downloadPDF() {
+          function downloadPDF() {
         var { jsPDF } = window.jspdf;
         var doc = new jsPDF();
 
+        // Utang List
         var columns = ["Name", "Loan Date", "Initial Loan", "Interest", "Total Loan", "Balance"];
         var rows = utangList.map(utang => [
             utang.name,
@@ -548,7 +549,18 @@
             utang.balance.toFixed(2)
         ]);
 
-        doc.autoTable(columns, rows);
+        doc.autoTable(columns, rows, { startY: 10 });
+
+        // Payment History
+        var paymentColumns = ["Name", "Amount Paid", "Date Paid"];
+        var paymentRows = paymentHistory.map(payment => [
+            payment.name,
+            payment.amountPaid.toFixed(2),
+            payment.datePaid
+        ]);
+
+        doc.autoTable(paymentColumns, paymentRows, { startY: doc.autoTable.previous.finalY + 10 });
+
         doc.save("utang_report.pdf");
     }
 
@@ -559,4 +571,4 @@
     };
 </script>
 </body>
-</html>
+</html>  
