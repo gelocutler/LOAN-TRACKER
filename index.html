@@ -555,24 +555,28 @@ function downloadPDF() {
     doc.text("Utang List", 10, 10);
     doc.autoTable(utangColumns, utangRows, { startY: 15 });
 
-    // Group payments by date and name
+    // Group payments by month and name
     var groupedPayments = {};
     paymentHistory.forEach(payment => {
-        if (!groupedPayments[payment.date]) {
-            groupedPayments[payment.date] = {};
+        var date = new Date(payment.date);
+        var month = date.toLocaleString('default', { month: 'long' });
+        var year = date.getFullYear();
+        var key = `${month} ${year}`;
+        if (!groupedPayments[key]) {
+            groupedPayments[key] = {};
         }
-        if (!groupedPayments[payment.date][payment.name]) {
-            groupedPayments[payment.date][payment.name] = [];
+        if (!groupedPayments[key][payment.name]) {
+            groupedPayments[key][payment.name] = [];
         }
-        groupedPayments[payment.date][payment.name].push(payment);
+        groupedPayments[key][payment.name].push(payment);
     });
 
-    // Add payments grouped by date and name to PDF
-    Object.keys(groupedPayments).forEach(date => {
-        doc.text(`Payments for ${date}`, 10, doc.lastAutoTable.finalY + 10);
+    // Add payments grouped by month and name to PDF
+    Object.keys(groupedPayments).forEach(monthYear => {
+        doc.text(`Payments for ${monthYear}`, 10, doc.lastAutoTable.finalY + 10);
         var startY = doc.lastAutoTable.finalY + 15;
-        Object.keys(groupedPayments[date]).forEach(name => {
-            var payments = groupedPayments[date][name];
+        Object.keys(groupedPayments[monthYear]).forEach(name => {
+            var payments = groupedPayments[monthYear][name];
             var rows = payments.map(payment => [name, formatCurrency(payment.amount), payment.date]);
             doc.autoTable(["Name", "Amount Paid", "Date Paid"], rows, { startY, margin: { top: 10 } });
             startY = doc.lastAutoTable.finalY + 10;
@@ -583,15 +587,6 @@ function downloadPDF() {
     doc.save("utang_report.pdf");
 }
 
-
-    // Tungkol sa iba pang functions sa iyong code
-
-    // Window onload function
-    window.onload = function() {
-        renderUtangList();
-        renderPaymentHistory();
-        updateSummary();
-    }
 </script>
 
 </body>
