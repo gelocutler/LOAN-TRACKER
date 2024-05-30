@@ -174,7 +174,6 @@
             <input type="date" id="loanDate" name="loanDate">
             <button type="button" onclick="addUtang()">Enter</button>
             <button type="button" onclick="downloadCSV()">Download CSV</button>
-            <button onclick="downloadPDF()">Download PDF</button>
         </form>
     </div>
 
@@ -265,26 +264,6 @@
 <script>
     var utangList = JSON.parse(localStorage.getItem("utangList")) || [];
     var paymentHistory = JSON.parse(localStorage.getItem("paymentHistory")) || [];
-
-    // Functions ng iyong application
-
-    function downloadPDF() {
-        var doc = new jsPDF(); // Dapat dagdagan ng import statement sa itaas nito.
-        doc.text("Utang List", 10, 10);
-        var headers = ["Name", "Loan Date", "Initial Loan", "Interest", "Total Loan", "Balance"];
-        var data = utangList.map(function(row) {
-            return [row.name, row.loanDate, formatCurrency(row.initialLoan), formatCurrency(row.interest), formatCurrency(row.totalLoan), formatCurrency(row.balance)];
-        });
-        doc.autoTable({
-            head: [headers],
-            body: data,
-        });
-        try {
-            doc.save("utangList.pdf");
-        } catch (error) {
-            console.error("Error sa pag-save ng PDF:", error);
-        }
-    }
 
     function saveData() {
         localStorage.setItem("utangList", JSON.stringify(utangList));
@@ -554,28 +533,27 @@
             }
         });
     }
-        function downloadCSV() {
-        var csv = 'Name,Loan Date,Initial Loan,Interest,Total Loan,Balance\n';
-        utangList.forEach(function(row) {
-            csv += `${row.name},${row.loanDate},${row.initialLoan},${row.interest},${row.totalLoan},${row.balance}\n`;
-        });
-        var csvFile = new Blob([csv], { type: 'text/csv' });
-        var downloadLink = document.createElement("a");
-        downloadLink.download = 'utangList.csv';
-        downloadLink.href = window.URL.createObjectURL(csvFile);
-        downloadLink.style.display = "none";
-        document.body.appendChild(downloadLink);
-        downloadLink.click();
-    }
-       
-    // Tungkol sa iba pang functions sa iyong code
+    
+function downloadCSV() {
+    var csv = 'Name,Loan Date,Initial Loan,Interest,Total Loan,Balance\n';
+    utangList.forEach(function(row) {
+        csv += `${row.name},${row.loanDate},${row.initialLoan},${row.interest},${row.totalLoan},${row.balance}\n`;
+    });
+    var csvFile = new Blob([csv], { type: 'text/csv' });
+    var downloadLink = document.createElement("a");
+    downloadLink.download = 'utangList.csv';
+    downloadLink.href = window.URL.createObjectURL(csvFile);
+    downloadLink.style.display = "none";
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+}
 
-    // Window onload function
-    window.onload = function() {
-        renderUtangList();
-        renderPaymentHistory();
-        updateSummary();
-    }
+// Window onload function
+window.onload = function() {
+    renderUtangList();
+    renderPaymentHistory();
+    updateSummary();
+}
 </script>
 
 </body>
