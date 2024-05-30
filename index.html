@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Utang Tracker</title>
@@ -173,6 +174,7 @@
             <input type="date" id="loanDate" name="loanDate">
             <button type="button" onclick="addUtang()">Enter</button>
             <button type="button" onclick="downloadCSV()">Download CSV</button>
+            <button onclick="downloadPDF()">Download PDF</button>
         </form>
     </div>
 
@@ -545,7 +547,20 @@
         document.body.appendChild(downloadLink);
         downloadLink.click();
     }
-
+    
+        function downloadPDF() {
+        var doc = new jsPDF();
+        doc.text("Utang List", 10, 10);
+        var headers = ["Name", "Loan Date", "Initial Loan", "Interest", "Total Loan", "Balance"];
+        var data = utangList.map(function(row) {
+            return [row.name, row.loanDate, formatCurrency(row.initialLoan), formatCurrency(row.interest), formatCurrency(row.totalLoan), formatCurrency(row.balance)];
+        });
+        doc.autoTable({
+            head: [headers],
+            body: data,
+        });
+        doc.save("utangList.pdf");
+    }
 
     // Tungkol sa iba pang functions sa iyong code
 
