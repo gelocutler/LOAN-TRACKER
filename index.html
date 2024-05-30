@@ -557,7 +557,9 @@
         }
     }
 }
-    function downloadCSV() {
+    function downloadCSV(event) {
+        event.preventDefault(); // Ito ang magpapigil sa default behavior ng link
+        
         var csv = "Name,Loan Date,Initial Loan,Interest,Total Loan,Payment Date,Payment Amount,Balance\n";
         utangList.forEach(utang => {
             utang.payments.forEach(payment => {
@@ -565,24 +567,16 @@
             });
         });
 
-        var blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-
-        if (navigator.msSaveBlob) { // IE 10+
-            navigator.msSaveBlob(blob, "utang_list.csv");
-        } else {
-            var link = document.createElement("a");
-            if (link.download !== undefined) {
-                var url = URL.createObjectURL(blob);
-                link.setAttribute("href", url);
-                link.setAttribute("download", "utang_list.csv");
-                link.style.visibility = "hidden";
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            }
-        }
-        return false; // Ito ay para maiwasan ang pag-blink ng screen
+        var encodedUri = encodeURI("data:text/csv;charset=utf-8," + csv);
+        var link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", "utang_list.csv");
+        document.body.appendChild(link); // Needed for Firefox
+        link.click();
     }
+
+    // I-bind ang event handler sa link
+    document.getElementById("downloadLink").addEventListener("click", downloadCSV);
 
     // Window onload function
     window.onload = function() {
