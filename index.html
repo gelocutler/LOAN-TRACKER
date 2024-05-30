@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<script src="path/to/jspdf.min.js"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Utang Tracker</title>
@@ -173,7 +172,6 @@
             <label for="loanDate">Loan Date:</label>
             <input type="date" id="loanDate" name="loanDate">
             <button type="button" onclick="addUtang()">Enter</button>
-            <button onclick="downloadDetailsAsPDF()">Download Details as PDF</button>
         </form>
     </div>
 
@@ -533,23 +531,6 @@
             }
         });
     }
-    function downloadDetailsAsPDF() {
-    var doc = new jsPDF();
-    doc.text("Utang Details", 10, 10);
-
-    var utangDetails = "";
-    utangList.forEach((utang, index) => {
-        utangDetails += `Name: ${utang.name}\n`;
-        utangDetails += `Loan Date: ${utang.loanDate}\n`;
-        utangDetails += `Initial Loan: ${formatCurrency(utang.initialLoan)}\n`;
-        utangDetails += `Interest: ${formatCurrency(utang.interest)}\n`;
-        utangDetails += `Total Loan: ${formatCurrency(utang.totalLoan)}\n`;
-        utangDetails += `Balance: ${formatCurrency(utang.balance)}\n\n`;
-    });
-
-    doc.text(utangDetails, 10, 20);
-    doc.save("utang_details.pdf");
-}
 
     // Tungkol sa iba pang functions sa iyong code
 
