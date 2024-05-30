@@ -532,6 +532,32 @@
             }
         });
     }
+          function downloadCSV() {
+    var csv = "Name,Loan Date,Initial Loan,Interest,Total Loan,Payment Date,Payment Amount,Balance\n";
+    utangList.forEach(utang => {
+        utang.payments.forEach(payment => {
+            csv += `${utang.name},${utang.loanDate},${utang.initialLoan},${utang.interest},${utang.totalLoan},${payment.date},${payment.amount},${utang.balance}\n`;
+        });
+    });
+
+    var blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+
+    if (navigator.msSaveBlob) { // IE 10+
+        navigator.msSaveBlob(blob, "utang_list.csv");
+    } else {
+        var link = document.createElement("a");
+        if (link.download !== undefined) {
+            var url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            link.setAttribute("download", "utang_list.csv");
+            link.style.visibility = "hidden";
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    }
+}
+
     
     // Tungkol sa iba pang functions sa iyong code
 
@@ -540,19 +566,6 @@
         renderUtangList();
         renderPaymentHistory();
         updateSummary();
-    }
-            function downloadCSV() {
-        var csvContent = "data:text/csv;charset=utf-8,";
-        csvContent += "Name,Amount,Date\n";
-        paymentHistory.forEach(payment => {
-            csvContent += `${payment.name},${payment.amount},${payment.date}\n`;
-        });
-        var encodedUri = encodeURI(csvContent);
-        var link = document.createElement("a");
-        link.setAttribute("href", encodedUri);
-        link.setAttribute("download", "payments.csv");
-        document.body.appendChild(link);
-        link.click();
     }
 </script>
 </body>
