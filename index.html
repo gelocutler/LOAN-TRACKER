@@ -547,20 +547,31 @@
         document.body.appendChild(downloadLink);
         downloadLink.click();
     }
-    
         function downloadPDF() {
-        var doc = new jsPDF();
-        doc.text("Utang List", 10, 10);
-        var headers = ["Name", "Loan Date", "Initial Loan", "Interest", "Total Loan", "Balance"];
-        var data = utangList.map(function(row) {
-            return [row.name, row.loanDate, formatCurrency(row.initialLoan), formatCurrency(row.interest), formatCurrency(row.totalLoan), formatCurrency(row.balance)];
+        // Create a new jsPDF instance
+       var doc = new jsPDF();
+
+       // Add content to the PDF
+       doc.text(20, 20, 'Utang Details:');
+        doc.text(20, 30, '---------------------------');
+
+        // Sample data (replace with your actual data)
+       var utangDetails = [
+        { name: 'Juan Dela Cruz', amount: 5000, balance: 2500 },
+        { name: 'Maria Santos', amount: 3000, balance: 1000 },
+        // Add more utang details here as needed
+       ];
+
+        var startY = 40;
+       utangDetails.forEach((detail, index) => {
+        var text = `Name: ${detail.name}, Amount: ${detail.amount}, Balance: ${detail.balance}`;
+        doc.text(20, startY + (index * 10), text);
         });
-        doc.autoTable({
-            head: [headers],
-            body: data,
-        });
-        doc.save("utangList.pdf");
+
+      // Save the PDF as a file
+      doc.save('utang_details.pdf');
     }
+    
 
     // Tungkol sa iba pang functions sa iyong code
 
