@@ -172,7 +172,7 @@
             <label for="loanDate">Loan Date:</label>
             <input type="date" id="loanDate" name="loanDate">
             <button type="button" onclick="addUtang()">Enter</button>
-            <button id="downloadCSV">Download CSV</button>
+            <button onclick="downloadCSV()">Download CSV</button>
         </form>
     </div>
 
@@ -557,9 +557,31 @@
         }
     }
 }
+    function downloadCSV() {
+        var csv = "Name,Loan Date,Initial Loan,Interest,Total Loan,Payment Date,Payment Amount,Balance\n";
+        utangList.forEach(utang => {
+            utang.payments.forEach(payment => {
+                csv += `${utang.name},${utang.loanDate},${utang.initialLoan},${utang.interest},${utang.totalLoan},${payment.date},${payment.amount},${utang.balance}\n`;
+            });
+        });
 
-    
-    // Tungkol sa iba pang functions sa iyong code
+        var blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+
+        if (navigator.msSaveBlob) { // IE 10+
+            navigator.msSaveBlob(blob, "utang_list.csv");
+        } else {
+            var link = document.createElement("a");
+            if (link.download !== undefined) {
+                var url = URL.createObjectURL(blob);
+                link.setAttribute("href", url);
+                link.setAttribute("download", "utang_list.csv");
+                link.style.visibility = "hidden";
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+        }
+    }
 
     // Window onload function
     window.onload = function() {
@@ -568,5 +590,6 @@
         updateSummary();
     }
 </script>
+
 </body>
 </html>
