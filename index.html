@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Utang Tracker</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.17/jspdf.plugin.autotable.min.js"></script>
 <style>
     body {
         font-family: Arial, sans-serif;
@@ -172,7 +174,7 @@
             <label for="loanDate">Loan Date:</label>
             <input type="date" id="loanDate" name="loanDate">
             <button type="button" onclick="addUtang()">Enter</button>
-            <button onclick="downloadPDF()">Download PDF</button>
+            <button type="button" onclick="downloadPDF()">downloadPDF</button>
         </form>
     </div>
 
@@ -260,7 +262,7 @@
     </div>
 </div>
 
-<script async>
+<script>
     var utangList = JSON.parse(localStorage.getItem("utangList")) || [];
     var paymentHistory = JSON.parse(localStorage.getItem("paymentHistory")) || [];
 
@@ -532,32 +534,7 @@
             }
         });
     }
-          function downloadCSV() {
-    var csv = "Name,Loan Date,Initial Loan,Interest,Total Loan,Payment Date,Payment Amount,Balance\n";
-    utangList.forEach(utang => {
-        utang.payments.forEach(payment => {
-            csv += `${utang.name},${utang.loanDate},${utang.initialLoan},${utang.interest},${utang.totalLoan},${payment.date},${payment.amount},${utang.balance}\n`;
-        });
-    });
-
-    var blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-
-    if (navigator.msSaveBlob) { // IE 10+
-        navigator.msSaveBlob(blob, "utang_list.csv");
-    } else {
-        var link = document.createElement("a");
-        if (link.download !== undefined) {
-            var url = URL.createObjectURL(blob);
-            link.setAttribute("href", url);
-            link.setAttribute("download", "utang_list.csv");
-            link.style.visibility = "hidden";
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
-    }
-}
-function downloadPDF() {
+    function downloadPDF() {
     var doc = new jsPDF();
     var data = [];
 
@@ -568,15 +545,26 @@ function downloadPDF() {
 
     // Tukuyin ang pamagat at mga header
     var headers = ["Name", "Loan Date", "Initial Loan", "Interest", "Total Loan", "Balance"];
+    
     // Lumikha ng PDF table gamit ang jsPDF autoTable plugin
     doc.autoTable({
         head: [headers],
-        body: data
+        body: data,
+        startY: 20 // Itakda ang pagsisimula ng pag-print ng table sa 20mm mula sa tuktok
     });
 
     // I-download ang PDF file
     doc.save("utang_list.pdf");
 }
+
+    // Tungkol sa iba pang functions sa iyong code
+
+    // Window onload function
+    window.onload = function() {
+        renderUtangList();
+        renderPaymentHistory();
+        updateSummary();
+    }
 </script>
 
 </body>
