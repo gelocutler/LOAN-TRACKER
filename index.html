@@ -172,7 +172,7 @@
             <label for="loanDate">Loan Date:</label>
             <input type="date" id="loanDate" name="loanDate">
             <button type="button" onclick="addUtang()">Enter</button>
-            <button onclick="downloadCSV()">Download CSV</button>
+            <button onclick="downloadPDF()">Download PDF</button>
         </form>
     </div>
 
@@ -557,33 +557,26 @@
         }
     }
 }
-    function downloadCSV(event) {
-        event.preventDefault(); // Ito ang magpapigil sa default behavior ng link
-        
-        var csv = "Name,Loan Date,Initial Loan,Interest,Total Loan,Payment Date,Payment Amount,Balance\n";
-        utangList.forEach(utang => {
-            utang.payments.forEach(payment => {
-                csv += `${utang.name},${utang.loanDate},${utang.initialLoan},${utang.interest},${utang.totalLoan},${payment.date},${payment.amount},${utang.balance}\n`;
-            });
-        });
+function downloadPDF() {
+    var doc = new jsPDF();
+    var data = [];
 
-        var encodedUri = encodeURI("data:text/csv;charset=utf-8," + csv);
-        var link = document.createElement("a");
-        link.setAttribute("href", encodedUri);
-        link.setAttribute("download", "utang_list.csv");
-        document.body.appendChild(link); // Needed for Firefox
-        link.click();
-    }
+    // I-loop ang utang list at ilagay ang bawat detalye sa data array
+    utangList.forEach(utang => {
+        data.push([utang.name, utang.loanDate, utang.initialLoan, utang.interest, utang.totalLoan, utang.balance]);
+    });
 
-    // I-bind ang event handler sa link
-    document.getElementById("downloadLink").addEventListener("click", downloadCSV);
+    // Tukuyin ang pamagat at mga header
+    var headers = ["Name", "Loan Date", "Initial Loan", "Interest", "Total Loan", "Balance"];
+    // Lumikha ng PDF table gamit ang jsPDF autoTable plugin
+    doc.autoTable({
+        head: [headers],
+        body: data
+    });
 
-    // Window onload function
-    window.onload = function() {
-        renderUtangList();
-        renderPaymentHistory();
-        updateSummary();
-    }
+    // I-download ang PDF file
+    doc.save("utang_list.pdf");
+}
 </script>
 
 </body>
