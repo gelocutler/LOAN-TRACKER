@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Utang Tracker</title>
+<script src="path/to/jspdf.min.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Utang Tracker</title>
 <style>
     body {
         font-family: Arial, sans-serif;
@@ -173,7 +173,7 @@
             <label for="loanDate">Loan Date:</label>
             <input type="date" id="loanDate" name="loanDate">
             <button type="button" onclick="addUtang()">Enter</button>
-            <button type="button" onclick="downloadCSV()">Download CSV</button>
+            <button onclick="downloadDetailsAsPDF()">Download Details as PDF</button>
         </form>
     </div>
 
@@ -533,27 +533,32 @@
             }
         });
     }
-    
-function downloadCSV() {
-    var csv = 'Name,Loan Date,Initial Loan,Interest,Total Loan,Balance\n';
-    utangList.forEach(function(row) {
-        csv += `${row.name},${row.loanDate},${row.initialLoan},${row.interest},${row.totalLoan},${row.balance}\n`;
+    function downloadDetailsAsPDF() {
+    var doc = new jsPDF();
+    doc.text("Utang Details", 10, 10);
+
+    var utangDetails = "";
+    utangList.forEach((utang, index) => {
+        utangDetails += `Name: ${utang.name}\n`;
+        utangDetails += `Loan Date: ${utang.loanDate}\n`;
+        utangDetails += `Initial Loan: ${formatCurrency(utang.initialLoan)}\n`;
+        utangDetails += `Interest: ${formatCurrency(utang.interest)}\n`;
+        utangDetails += `Total Loan: ${formatCurrency(utang.totalLoan)}\n`;
+        utangDetails += `Balance: ${formatCurrency(utang.balance)}\n\n`;
     });
-    var csvFile = new Blob([csv], { type: 'text/csv' });
-    var downloadLink = document.createElement("a");
-    downloadLink.download = 'utangList.csv';
-    downloadLink.href = window.URL.createObjectURL(csvFile);
-    downloadLink.style.display = "none";
-    document.body.appendChild(downloadLink);
-    downloadLink.click();
+
+    doc.text(utangDetails, 10, 20);
+    doc.save("utang_details.pdf");
 }
 
-// Window onload function
-window.onload = function() {
-    renderUtangList();
-    renderPaymentHistory();
-    updateSummary();
-}
+    // Tungkol sa iba pang functions sa iyong code
+
+    // Window onload function
+    window.onload = function() {
+        renderUtangList();
+        renderPaymentHistory();
+        updateSummary();
+    }
 </script>
 
 </body>
