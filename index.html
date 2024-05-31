@@ -537,12 +537,6 @@
 function downloadPDF() {
     var { jsPDF } = window.jspdf;
     var doc = new jsPDF();
-    var rowsPerPage = 365;
-
-    // Professional font settings
-    var headerFont = { size: 16, fontStyle: 'bold' };
-    var subtitleFont = { size: 14, fontStyle: 'bold' };
-    var contentFont = { size: 10, fontStyle: 'normal' };
 
     // Group utang by name
     var utangByPerson = {};
@@ -556,84 +550,87 @@ function downloadPDF() {
     // Group payments by name and month
     var paymentsByPersonAndMonth = {};
     paymentHistory.forEach(payment => {
-        var month = new Date(payment.date).getMonth() + 1; // Extract month from date
-        var key = `${payment.name}-${month}`;
+        var key = payment.name + '_' + new Date(payment.date).getMonth(); // Use month as part of the key
         if (!paymentsByPersonAndMonth[key]) {
             paymentsByPersonAndMonth[key] = [];
         }
         paymentsByPersonAndMonth[key].push(payment);
     });
 
-    // Generate PDF for each person
-    Object.keys(utangByPerson).forEach((name, personIndex) => {
-        // Add new page for each person, but not for the first person
-        if (personIndex > 0) {
+    // Generate PDF for each person and month
+    Object.keys(utangByPerson).forEach(name => {
+        // Check if the person has a non-zero balance
+        var totalBalance = utangByPerson[name].reduce((sum, utang) => sum + utang.balance, 0);
+        if (totalBalance > 0) {
+            // Utang info
+            var utangRows = utangByPerson[name].map(utang => [
+                utang.name,
+                utang.loanDate,
+                utang.initialLoan.toFixed(2),
+                utang.interest.toFixed(2),
+                utang.totalLoan.toFixed(2),
+                utang.balance.toFixed(2)
+            ]);
+            doc.setFontSize(18);
+            doc.text(`${name}'s Utang List`, 10, 10);
+            doc.autoTable({
+                startY: 20,
+                head: [["Name", "Loan Date", "Initial Loan", "Interest", "Total Loan", "Balance"]],
+                body: utangRows,
+                theme: 'striped',
+                headStyles: { fillColor: [52, 73, 94] },
+                styles: { fontSize: 10 }
+            });
+
+            // Payments
+            Object.keys(paymentsByPersonAndMonth).forEach(key => {
+                var [person, month] = key.split('_');
+                if (person === name) {
+                    var monthName = new Date(2024, parseInt(month)).toLocaleString('en-us', { month: 'long' }); // Corrected to parse month as integer
+                    var paymentRows = paymentsByPersonAndMonth[key].map(payment => [
+                        name,
+                        payment.amount.toFixed(2),
+                        payment.date
+                    ]);
+                    var finalY = doc.previousAutoTable ? doc.previousAutoTable.finalY + 10 : 30;
+                    doc.setFontSize(18);
+                    doc.text(`${name}'s Payments - ${monthName}`, 10, finalY);
+                    finalY += 5;
+                    doc.autoTable({
+                        startY: finalY,
+                        head: [["Name", "Amount Paid", "Date Paid"]],
+                        body: paymentRows,
+                        theme: 'grid',
+                        styles: { fontSize: 10 },
+                        margin: { top: 10 }
+                    });
+                }
+            });
+
+            // Add page break for next person
             doc.addPage();
         }
-
-        // Utang info
-        var utangRows = utangByPerson[name].map(utang => [
-            utang.name,
-            utang.loanDate,
-            utang.initialLoan.toFixed(2),
-            utang.interest.toFixed(2),
-            utang.totalLoan.toFixed(2),
-            utang.balance.toFixed(2)
-        ]);
-        doc.setFontSize(headerFont.size);
-        doc.setFont(undefined, headerFont.fontStyle);
-        doc.text(`${name}'s Utang List`, 10, 10);
-
-        doc.autoTable({
-            startY: 20,
-            head: [["Name", "Loan Date", "Initial Loan", "Interest", "Total Loan", "Balance"]],
-            body: utangRows,
-            theme: 'striped',
-            headStyles: { fillColor: [52, 73, 94], textColor: [255, 255, 255] },
-            styles: { fontSize: contentFont.size }
-        });
-
-        // Payments grouped by month
-        var startY = doc.previousAutoTable.finalY + 20;
-        for (let month = 1; month <= 12; month++) {
-            var key = `${name}-${month}`;
-            if (paymentsByPersonAndMonth[key]) {
-                var paymentRows = paymentsByPersonAndMonth[key].map(payment => [
-                    name,
-                    payment.amount.toFixed(2),
-                    payment.date
-                ]);
-
-                // Add header for each month
-                doc.setFontSize(subtitleFont.size);
-                doc.setFont(undefined, subtitleFont.fontStyle);
-                doc.text(`Payments for Month ${month}`, 10, startY);
-
-                doc.autoTable({
-                    startY: startY + 5,
-                    head: [["Name", "Amount Paid", "Date Paid"]],
-                    body: paymentRows,
-                    theme: 'grid',
-                    headStyles: { fillColor: [100, 149, 237], textColor: [255, 255, 255] },  // Different color for payment header
-                    styles: { fontSize: contentFont.size },
-                    margin: { top: 10 }
-                });
-
-                // Update startY for next month's table
-                startY = doc.previousAutoTable.finalY + 10;
-            }
-        }
     });
+
+    // Add footer with page numbers
+    var totalPages = doc.internal.getNumberOfPages();
+    for (var i = 1; i <= totalPages; i++) {
+        doc.setPage(i);
+        doc.setFontSize(10);
+        doc.text('Page ' + i + ' of ' + totalPages, doc.internal.pageSize.getWidth() - 50, doc.internal.pageSize.getHeight() - 10);
+    }
 
     // Save PDF
     doc.save("utang_reports_combined.pdf");
 }
+    
 // Window onload function
 window.onload = function() {
     renderUtangList();
     renderPaymentHistory();
     updateSummary();
 }
+
 </script>
 
 </body>
